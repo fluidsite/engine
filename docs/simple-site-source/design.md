@@ -23,9 +23,10 @@ Every site repository has this shape:
 business.json
 src/
   index.ts
-  styles.css
-  site.js
-  fonts/
+  assets/
+    styles.css
+    site.js
+    fonts/
 public/
   images/
 package.json

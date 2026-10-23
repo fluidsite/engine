@@ -51,6 +51,25 @@ test("requires a home page and preserves the previous dist on failure", async ()
   assert.equal(await readFile(join(root, "dist", "index.html"), "utf8"), "previous build");
 });
 
+test("preserves the previous dist when business data is invalid", async () => {
+  const root = await siteFixture(`export function build() { return { "index.html": "new" }; }`);
+  await writeFile(join(root, "business.json"), JSON.stringify({ name: "" }));
+  await mkdir(join(root, "dist"));
+  await writeFile(join(root, "dist", "index.html"), "previous build");
+
+  await assert.rejects(build(root), /Record failed validation/);
+  assert.equal(await readFile(join(root, "dist", "index.html"), "utf8"), "previous build");
+});
+
+test("preserves the previous dist when site source throws", async () => {
+  const root = await siteFixture(`export function build() { throw new Error("broken source"); }`);
+  await mkdir(join(root, "dist"));
+  await writeFile(join(root, "dist", "index.html"), "previous build");
+
+  await assert.rejects(build(root), /broken source/);
+  assert.equal(await readFile(join(root, "dist", "index.html"), "utf8"), "previous build");
+});
+
 test("rejects pages that escape dist", async () => {
   const root = await siteFixture(`
     export function build() {
@@ -59,4 +78,12 @@ test("rejects pages that escape dist", async () => {
   `);
 
   await assert.rejects(build(root), /escapes dist/);
+});
+
+test("rejects output directories that could overwrite source or parent files", async () => {
+  const root = await siteFixture(`export function build() { return { "index.html": "Home" }; }`);
+
+  await assert.rejects(build(root, "src"), /safe site-local build directory/);
+  await assert.rejects(build(root, ".."), /safe site-local build directory/);
+  assert.match(await readFile(join(root, "src", "index.ts"), "utf8"), /export function build/);
 });

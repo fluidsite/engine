@@ -1,7 +1,7 @@
 /** Build an AI-owned site from business.json, src/, and public/ into dist/. */
 import { cp, mkdir, mkdtemp, rename, rm, stat, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { readRecord } from "./record.ts";
 import { loadSiteSource, siteBuildContext } from "./site.ts";
 import { renderJsonLdScript } from "./jsonld.ts";
@@ -22,6 +22,24 @@ export function injectJsonLd(html: string, business: Business): string {
   return html.includes("</head>") ? html.replace("</head>", `${script}</head>`) : script + html;
 }
 
+const RESERVED_OUTPUT_DIRS = new Set(["src", "public", ".git", "node_modules"]);
+
+function safeBuildDirectory(root: string, outDirName: string): string {
+  if (!outDirName || isAbsolute(outDirName)) {
+    throw new FluidsiteError(`Invalid output directory: ${outDirName || "(empty)"}`);
+  }
+  const outDir = resolve(root, outDirName);
+  const name = basename(outDir);
+  if (
+    dirname(outDir) !== root ||
+    RESERVED_OUTPUT_DIRS.has(name) ||
+    name.startsWith(".fluidsite-build-")
+  ) {
+    throw new FluidsiteError(`Output must be a safe site-local build directory: ${outDirName}`);
+  }
+  return outDir;
+}
+
 function safeOutputPath(root: string, pagePath: string): string {
   if (!pagePath || isAbsolute(pagePath)) {
     throw new FluidsiteError(`Invalid output page path: ${pagePath || "(empty)"}`);
@@ -39,7 +57,7 @@ function safeOutputPath(root: string, pagePath: string): string {
 
 export async function build(sitePath: string, outDirName = "dist"): Promise<BuildResult> {
   const root = resolve(sitePath);
-  const outDir = join(root, outDirName);
+  const outDir = safeBuildDirectory(root, outDirName);
   const business = await readRecord(root);
   const source = await loadSiteSource(root);
   const pages = await source.build(siteBuildContext(business));
