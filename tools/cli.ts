@@ -32,6 +32,12 @@ export type CommandHandler = (args: CliArgs) => Promise<CommandResult>;
 const COMMANDS: Record<string, () => Promise<CommandHandler>> = {
   build: async () => (await import("./commands/build.ts")).buildCommand,
   "get-record": async () => (await import("./commands/get-record.ts")).getRecordCommand,
+  "propose-change": async () => (await import("./commands/propose-change.ts")).proposeChangeCommand,
+  "apply-change": async () => (await import("./commands/apply-change.ts")).applyChangeCommand,
+  "discard-change": async () => (await import("./commands/discard-change.ts")).discardChangeCommand,
+  "add-image": async () => (await import("./commands/stubs.ts")).addImageCommand,
+  "get-analytics": async () => (await import("./commands/stubs.ts")).getAnalyticsCommand,
+  "extract-prices": async () => (await import("./commands/stubs.ts")).extractPricesCommand,
 };
 
 const KNOWN_COMMANDS = [
