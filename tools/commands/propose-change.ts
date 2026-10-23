@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import type { CliArgs, CommandResult } from "../cli.ts";
 import { readRecord, writeRecord } from "../../lib/record.ts";
 import { applyMergePatch } from "../../lib/patch.ts";
-import { build } from "../../renderer/build.ts";
+import { build } from "../../lib/build.ts";
 import { NotWiredError } from "../../lib/errors.ts";
 import * as git from "../../lib/git.ts";
 import { waitForPreview } from "../../lib/cloudflare.ts";

@@ -1,7 +1,7 @@
 /**
  * The business record: the single source of truth for a Fluidsite client site.
  *
- * Loosely modelled on schema.org LocalBusiness. Every template reads its facts
+ * Loosely modelled on schema.org LocalBusiness. Every site reads its facts
  * from this record (never hardcoded), and the record also feeds JSON-LD, Google
  * Business Profile and, later, MCP. Services are deliberately booking-ready so an
  * AI agent can book them later.
@@ -234,7 +234,7 @@ export const reviewsSchema = z.object({
 
 /**
  * A named narrative content block (e.g. "story", "directions", "cta"). Keeps the
- * schema flexible for page content without churn: templates reference blocks by key.
+ * schema flexible for page content without churn: site code references blocks by key.
  */
 export const contentBlockSchema = z.object({
   heading: z.string().optional(),

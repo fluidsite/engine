@@ -33,13 +33,9 @@ validation and guardrails live here, so the front end can be swapped out.
   returns schema-valid services marked `verified: false`, plus a review list of
   anything unclear. It is used during import and later whenever an owner sends a
   new price list over WhatsApp.
-- `renderer/`: builds static HTML by combining a site repo's `business.json` with
-  that site's own templates in its `theme/` folder. Keep it simple (Eleventy or
-  plain TypeScript string templates). There is NO shared design across clients:
-  every site's look, layout and pages are its own and can change whenever the
-  owner asks. The engine only supplies plumbing: loading and validating the
-  record, template helpers, JSON-LD generation (always injected, whatever the
-  design), image handling and the build.
+- `lib/build.ts`: validates a site's `business.json`, runs its AI-owned `src/index.ts`,
+  injects JSON-LD, copies `src/assets/` and `public/`, and writes `dist/`. There is
+  NO shared design across clients. The engine supplies plumbing, not presentation.
 - `tools/`: TypeScript CLI tools (below), exposed through a single `fluidsite` bin.
 - `lib/`: shared helpers (git operations, schema validation, image optimisation,
   Cloudflare API, Playwright screenshots).
@@ -49,8 +45,8 @@ validation and guardrails live here, so the front end can be swapped out.
 - `business.json`: the single source of truth for all content.
 - `SITE_BRIEF.md`: tone of voice, brand notes, things the agent must never change.
 - `public/images/`: optimised images (WebP, max 2000px).
-- `theme/`: this site's own templates, CSS and layout. Fully owned by the site,
-  created and changed by the agent on the owner's request.
+- `src/`: this site's HTML-producing code and assets. Fully owned by the AI agent.
+  `src/index.ts` may produce any number of HTML pages without an engine change.
 - `package.json`: depends on this engine via a pinned git tag, e.g.
   `"fluidsite-engine": "github:<owner>/fluidsite-engine#v0.1.0"`.
 - Cloudflare Pages build command: `npx fluidsite build`, output dir `dist`.
@@ -63,9 +59,9 @@ validation and guardrails live here, so the front end can be swapped out.
 - Every content change goes through schema validation. Never free-form edits to
   generated HTML.
 - Design is flexible, content is structured. The agent may freely change a site's
-  `theme/` (layout, styling, new page types, sections) when the owner asks, but
-  templates must read all business facts (name, hours, prices, services, contact
-  details, FAQs, images) from `business.json`. Never hardcode them in templates,
+  `src/` (layout, styling, new page types, sections) when the owner asks, but
+  site code must read all business facts (name, hours, prices, services, contact
+  details, FAQs, images) from `business.json`. Never hardcode them in pages,
   because the record also feeds JSON-LD, Google Business Profile and MCP later.
   If a design request needs data the schema doesn't have, extend the schema
   rather than hardcoding it.
@@ -107,8 +103,8 @@ be given to you.
 1. Inspect the site repo's exported HTML/CSS/assets and summarise its structure.
 2. Scaffold this engine repo: TypeScript, minimal dependencies, `fluidsite` bin.
 3. Write the Zod schema.
-4. Build the renderer. Convert the current exported site into templates in the
-   site repo's `theme/` folder, so it renders visually identically from
+4. Build the site compiler. Convert the current exported site into AI-owned source
+   in the site repo's `src/` folder, so it renders visually identically from
    business.json. This is my cousin's design, not a default for other clients.
    JSON-LD is injected by the engine.
 5. Write a one-off `fluidsite import` command that extracts the exported site's
@@ -125,7 +121,7 @@ build settings.
 ## Constraints
 
 - Keep dependencies minimal: zod, sharp, playwright, a git library or shell git,
-  and the renderer. Nothing else without asking.
+  and the build plumbing. Nothing else without asking.
 - The rendered site must look identical to the current one before the old HTML is
   removed.
 - No secrets in code. Use `.env` with a committed `.env.example` (GitHub token,

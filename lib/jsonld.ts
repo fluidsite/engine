@@ -1,5 +1,5 @@
 /**
- * JSON-LD generation. The engine ALWAYS injects this, whatever the theme's design,
+ * JSON-LD generation. The engine always injects this, whatever the site's design,
  * so the record feeds Google Business Profile, rich results and (later) MCP.
  *
  * Produces a LocalBusiness node (with address, geo, hours, socials, rating), a

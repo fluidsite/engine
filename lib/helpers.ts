@@ -1,8 +1,8 @@
 /**
- * Template helpers a site's theme uses to turn the business record into HTML.
+ * Small HTML helpers available to a site's AI-owned source code.
  *
  * These are the engine's "plumbing": escaping, money and opening-hours
- * formatting, and image tags. They let every theme read facts from the record
+ * formatting, and image tags. They let every site read facts from the record
  * consistently (and keep JSON-LD, GBP pricing and a11y in sync) without each
  * site re-implementing them.
  */
@@ -119,7 +119,7 @@ export function img(image: Image, opts: ImgOptions = {}): string {
   return `<img ${attrs.join(" ")}>`;
 }
 
-/** The full helper surface passed to a theme at render time. */
+/** The full helper surface passed to a site at build time. */
 export interface Helpers {
   escapeHtml: typeof escapeHtml;
   escapeAttr: typeof escapeAttr;

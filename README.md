@@ -27,13 +27,17 @@ Commands: `build`, `get-record`, `propose-change`, `apply-change`, `discard-chan
 ## Layout
 
 - `schema/` — Zod schema for the business record (+ JSON Schema export).
-- `renderer/` — builds static HTML from a site's `business.json` and its own `theme/`.
 - `tools/` — CLI subcommands, exposed via the single `fluidsite` bin.
-- `lib/` — shared helpers (git, validation, image optimisation, Cloudflare, screenshots).
+- `lib/` — build plumbing and shared helpers (validation, structured data, git, images).
+- `tests/` — focused tests for the public site contract and failure paths.
+
+Each client site stays deliberately small: structured facts in `business.json`,
+AI-owned pages and assets in `src/`, and images in `public/`.
 
 ## Develop
 
 ```bash
 npm run typecheck   # tsc --noEmit
+npm test            # site contract tests
 npm run build       # compile to dist/
 ```
