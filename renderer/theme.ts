@@ -9,6 +9,7 @@
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { tsImport } from "tsx/esm/api";
 import type { Business } from "../schema/business.ts";
 import { helpers, type Helpers } from "./helpers.ts";
 import { FluidsiteError } from "../lib/errors.ts";
@@ -43,7 +44,10 @@ export async function loadTheme(sitePath: string): Promise<Theme> {
     );
   }
 
-  const mod = (await import(pathToFileURL(entry).href)) as Record<string, unknown>;
+  const entryUrl = pathToFileURL(entry).href;
+  const mod = (entry.endsWith(".ts")
+    ? await tsImport(entryUrl, import.meta.url)
+    : await import(entryUrl)) as Record<string, unknown>;
   const theme = (mod.default ?? mod) as Partial<Theme>;
   if (typeof theme.renderPage !== "function") {
     throw new FluidsiteError(`theme entry ${entry} does not export renderPage(ctx)`);

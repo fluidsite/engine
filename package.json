@@ -1,6 +1,6 @@
 {
   "name": "fluidsite-engine",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The engine behind Fluidsite: small business websites managed by an AI agent. Operates on per-client site repos.",
   "type": "module",
   "bin": {
@@ -18,17 +18,18 @@
   },
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
     "typecheck": "tsc --noEmit",
     "fluidsite": "tsx tools/cli.ts"
   },
   "dependencies": {
     "sharp": "^0.33.5",
+    "tsx": "^4.19.2",
     "zod": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
     "playwright": "^1.49.0",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
 }
