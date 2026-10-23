@@ -21,11 +21,19 @@ const DAY_SCHEMA: Record<string, string> = {
 type Json = Record<string, unknown>;
 
 function localBusiness(b: Business): Json {
-  const node: Json = { "@context": "https://schema.org", "@type": "LocalBusiness", name: b.name };
+  const base = (b.meta.canonicalUrl ?? b.url ?? "").replace(/\/+$/, "");
+  const abs = (src: string): string => (base && src.startsWith("/") ? base + src : src);
+
+  const node: Json = {
+    "@context": "https://schema.org",
+    "@type": b.schemaType ?? "LocalBusiness",
+    name: b.name,
+  };
 
   if (b.description) node.description = b.description;
   if (b.url) node.url = b.url;
-  if (b.logo) node.image = b.logo.src;
+  const images = [b.logo, ...b.cover, ...b.gallery].filter(Boolean).map((img) => abs(img!.src));
+  if (images.length) node.image = images.length === 1 ? images[0] : images;
   if (b.phone) node.telephone = b.phone;
   if (b.email) node.email = b.email;
 
@@ -54,12 +62,33 @@ function localBusiness(b: Business): Json {
   const sameAs = b.social.map((s) => s.url);
   if (sameAs.length) node.sameAs = sameAs;
 
+  const employees = b.team.map((m) => {
+    const person: Json = { "@type": "Person", name: m.name };
+    if (m.role) person.jobTitle = m.role;
+    if (m.photo) person.image = abs(m.photo.src);
+    if (m.bio) person.description = m.bio;
+    const personSameAs = m.social.map((s) => s.url);
+    if (personSameAs.length) person.sameAs = personSameAs;
+    return person;
+  });
+  if (employees.length) node.employee = employees;
+
   if (b.reviews && b.reviews.count > 0) {
     node.aggregateRating = {
       "@type": "AggregateRating",
       ratingValue: b.reviews.rating,
       reviewCount: b.reviews.count,
     };
+    const reviews = b.reviews.items.map((it) => {
+      const review: Json = {
+        "@type": "Review",
+        author: { "@type": "Person", name: it.author },
+        reviewRating: { "@type": "Rating", ratingValue: it.rating, bestRating: 5 },
+      };
+      if (it.text) review.reviewBody = it.text;
+      return review;
+    });
+    if (reviews.length) node.review = reviews;
   }
   return node;
 }

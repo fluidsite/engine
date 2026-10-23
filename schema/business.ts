@@ -284,6 +284,9 @@ export const businessSchema = z.object({
   /** Named narrative blocks keyed by slug (story, directions, cta, …). */
   content: z.record(z.string(), contentBlockSchema).default({}),
 
+  /** schema.org type for the JSON-LD node, e.g. "HairSalon". Falls back to LocalBusiness. */
+  schemaType: z.string().optional(),
+
   /** Page metadata. */
   meta: z
     .object({

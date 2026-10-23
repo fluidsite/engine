@@ -5,6 +5,7 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { readRecord } from "./record.ts";
 import { loadSiteSource, siteBuildContext } from "./site.ts";
 import { renderJsonLdScript } from "./jsonld.ts";
+import { writeSeoAssets } from "./seo.ts";
 import { FluidsiteError } from "./errors.ts";
 import type { Business } from "../schema/business.ts";
 
@@ -75,6 +76,8 @@ export async function build(sitePath: string): Promise<BuildResult> {
         "utf8",
       );
     }
+
+    await writeSeoAssets(stagingDir, business, root);
 
     const { size: htmlBytes } = await stat(join(stagingDir, "index.html"));
     await rm(outDir, { recursive: true, force: true });

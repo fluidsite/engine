@@ -1,6 +1,6 @@
 {
   "name": "fluidsite-engine",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "The engine behind Fluidsite: small business websites managed by an AI agent. Operates on per-client site repos.",
   "type": "module",
   "bin": {
