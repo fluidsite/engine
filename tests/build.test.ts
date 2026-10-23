@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import test from "node:test";
 import { build } from "../lib/build.ts";
+import { buildCommand } from "../tools/commands/build.ts";
 
 async function siteFixture(source: string): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), "fluidsite-test-"));
@@ -80,10 +81,9 @@ test("rejects pages that escape dist", async () => {
   await assert.rejects(build(root), /escapes dist/);
 });
 
-test("rejects output directories that could overwrite source or parent files", async () => {
-  const root = await siteFixture(`export function build() { return { "index.html": "Home" }; }`);
-
-  await assert.rejects(build(root, "src"), /safe site-local build directory/);
-  await assert.rejects(build(root, ".."), /safe site-local build directory/);
-  assert.match(await readFile(join(root, "src", "index.ts"), "utf8"), /export function build/);
+test("the CLI always writes to dist and rejects custom output paths", async () => {
+  await assert.rejects(
+    buildCommand({ command: "build", site: "/unused", flags: { out: "business.json" }, positionals: [] }),
+    /always writes to dist/,
+  );
 });
