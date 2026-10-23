@@ -25,8 +25,14 @@ export type CommandHandler = (args: CliArgs) => Promise<CommandResult>;
 /**
  * Command registry. Handlers are added as each is implemented. Until then a
  * command resolves to a clear "not implemented" stub rather than crashing.
+ *
+ * Imports are deferred (dynamic) so a single failing command module never stops
+ * the whole CLI from loading, and so `--help` stays dependency-free.
  */
-const COMMANDS: Record<string, CommandHandler> = {};
+const COMMANDS: Record<string, () => Promise<CommandHandler>> = {
+  build: async () => (await import("./commands/build.ts")).buildCommand,
+  "get-record": async () => (await import("./commands/get-record.ts")).getRecordCommand,
+};
 
 const KNOWN_COMMANDS = [
   "build",
@@ -94,14 +100,15 @@ async function main(): Promise<void> {
     return;
   }
 
-  const handler = COMMANDS[args.command];
-  if (!handler) {
+  const loader = COMMANDS[args.command];
+  if (!loader) {
     printJson({ ok: false, command: args.command, error: "Not implemented yet." });
     process.exitCode = 1;
     return;
   }
 
   try {
+    const handler = await loader();
     const result = await handler(args);
     printJson(result);
   } catch (err) {
