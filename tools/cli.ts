@@ -38,6 +38,7 @@ const COMMANDS: Record<string, () => Promise<CommandHandler>> = {
   "add-image": async () => (await import("./commands/stubs.ts")).addImageCommand,
   "get-analytics": async () => (await import("./commands/stubs.ts")).getAnalyticsCommand,
   "extract-prices": async () => (await import("./commands/stubs.ts")).extractPricesCommand,
+  import: async () => (await import("./commands/import.ts")).importCommand,
 };
 
 const KNOWN_COMMANDS = [
